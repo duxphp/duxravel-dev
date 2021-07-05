@@ -63,6 +63,8 @@ class MakeFun
         if (!$type) {
             $this->makeModel($app, $data, $table, $fun, $key);
         }
+
+        Artisan::call("app:build");
     }
 
     public function makeAdmin($app, $data, $fun, $key)
