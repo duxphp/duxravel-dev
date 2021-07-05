@@ -29,7 +29,7 @@
         "Modules\\Dev\\Service\\Menu"
       ],
       "route": [
-        "src/Dev/Route/AuthAdmin.php"
+        "src/Route/AuthAdmin.php"
       ]
     }
   },
