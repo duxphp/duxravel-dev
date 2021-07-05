@@ -10,8 +10,7 @@
   ],
   "license": "MIT",
   "require": {
-    "php": ">=7.4",
-    "duxphp/duxravel-app": "<2.0.0"
+    "php": ">=7.4"
   },
   "autoload": {
     "psr-4": {
