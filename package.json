@@ -1,0 +1,42 @@
+{
+  "name": "duxphp/duxravel-dev",
+  "type": "library",
+  "description": "开发者工具",
+  "authors": [
+    {
+      "name": "duxphp",
+      "email": "admin@duxphp.com"
+    }
+  ],
+  "license": "MIT",
+  "require": {
+    "php": ">=7.4",
+    "duxphp/duxravel-app": "<2.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Modules\\Dev\\": "src"
+    }
+  },
+  "extra": {
+    "branch-alias": {},
+    "laravel": {
+      "providers": [
+        "Modules\\Dev\\Providers\\DevServiceProvider"
+      ]
+    },
+    "duxravel": {
+      "service": [
+        "Modules\\Dev\\Service\\Menu"
+      ],
+      "route": [
+        "src/Dev/Route/AuthAdmin.php"
+      ]
+    }
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true,
+    "preferred-install": "dist"
+  }
+}
