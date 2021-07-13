@@ -57,9 +57,9 @@ class App extends \Modules\System\Admin\Expend
     }
 
     public function generateAppForm($id = 0) {
-
+        
         if ($id) {
-            $data = $this->model::find($id)->value('data');
+            $data = $this->model::where(['app_id' => $id])->value('data');
         }else {
             $data = [];
         }
