@@ -5,8 +5,12 @@
 <div class="p-6 pb-0" id="counter">
     <div class="p-5 rounded border shadow-sm text-yellow-900 bg-yellow-200 border-yellow-400 mb-4" style="">
         <div class="flex-grow flex items-center gap-4">
-            <div class="flex-none w-6 h-6 hidden lg:block"><svg class="stroke-current w-full h-full" style="" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 8V12M12 16H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+            <div class="flex-none w-6 h-6 hidden lg:block">
+                <svg class="stroke-current w-full h-full" style="" width="24" height="24" viewBox="0 0 24 24"
+                     fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M12 8V12M12 16H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                 </svg>
             </div>
             <div class="font-medium">使用提示</div>
@@ -15,14 +19,7 @@
     </div>
 
     <div class="bg-white rounded shadow p-6 mb-4">
-        <div class="grid grid-cols-3  gap-4 ">
-            <div>
-                <label class="form-label block mb-2 text-gray-700 ">应用
-                </label>
-                <div>
-                    <input type="text" class="form-input" v-model="info.app" placeholder="请输入应用路径">
-                </div>
-            </div>
+        <div class="grid grid-cols-2  gap-4 ">
             <div>
                 <label class="form-label block mb-2 text-gray-700 ">控制器
                 </label>
@@ -34,7 +31,7 @@
                 <label class="form-label block mb-2 text-gray-700 ">模型
                 </label>
                 <div>
-                    <input type="text" class="form-input" v-model="info.name" placeholder="请输入模型路径">
+                    <input type="text" class="form-input" v-model="info.model" placeholder="请输入模型路径">
                 </div>
             </div>
         </div>
@@ -76,11 +73,13 @@
 
                     </div>
                     <div class="flex-grow bg-white border border-gray-300 self-start">
-                        <div class="text-base p-4 border-b border-gray-300 border-gray-200 bg-gray-200 flex items-center">
+                        <div
+                            class="text-base p-4 border-b border-gray-300 border-gray-200 bg-gray-200 flex items-center">
                             <div class="flex-grow">设计区域</div>
                             <div class="flex-none flex gap-2 text-sm">
-                                <button type="button" @click="generateForm" class="btn-blue">生成</button>
-                                <button type="button" @click="copyForm" class="btn-green">复制</button>
+                                <button type="button" @click="generateForm" class="btn-blue" :disabled="lock || !formData.length || !info.class">生成
+                                </button>
+                                <button type="button" @click="copyForm" class="btn-blue" :disabled="lock || !formData.length">复制</button>
                             </div>
                         </div>
                         <div class="flex justify-center items-center p-10" v-if="!formData.length">
@@ -234,11 +233,12 @@
                     </div>
                     <div class="flex-grow">
                         <div class="flex-grow bg-white border border-gray-300 self-start">
-                            <div class="text-base p-4 border-b border-gray-300 border-gray-200 bg-gray-200 flex items-center">
+                            <div
+                                class="text-base p-4 border-b border-gray-300 border-gray-200 bg-gray-200 flex items-center">
                                 <div class="flex-grow">设计区域</div>
                                 <div class="flex-none flex gap-2 text-sm">
-                                    <button type="button" @click="generateTable" class="btn-blue">生成</button>
-                                    <button type="button" @click="copyTable" class="btn-green">复制</button>
+                                    <button type="button" @click="generateTable" class="btn-blue" :disabled="lock || !info.class || (!tableData.action.length && !tableData.filter.length && !tableData.column.length)">生成</button>
+                                    <button type="button" @click="copyTable" class="btn-blue" :disabled="lock || (!tableData.action.length && !tableData.filter.length && !tableData.column.length)">复制</button>
                                 </div>
                             </div>
                             <div class="flex justify-center items-center p-10"
@@ -409,8 +409,6 @@
                 <div class="flex items-center">
                     <div class="flex-grow flex gap-4 items-center">
                         <label class="flex gap-2 items-center"><input type="checkbox" class="form-checkbox"
-                                                                      v-model="dataFun.time" value="1"> <span>时间</span></label>
-                        <label class="flex gap-2 items-center"><input type="checkbox" class="form-checkbox"
                                                                       v-model="dataFun.del" value="1"> <span>软删除</span></label>
                         <label class="flex gap-2 items-center"><input type="checkbox" class="form-checkbox"
                                                                       v-model="dataFun.tree" value="1">
@@ -425,11 +423,26 @@
                                                                       v-model="dataFun.tag" value="1">
                             <span>tag 标签</span></label>
                     </div>
-                    <div class="flex-none">
-                        <button type="button" class="btn-blue" @click="addData()">增加</button>
+                    <div class="flex-none flex gap-2">
+                        <button type="button" class="btn-blue" @click="addData()" :disabled="lock">增加字段</button>
+                        <button type="button" class="btn-blue" @click="saveData()" :disabled="lock || !info.model">写入模型</button>
                     </div>
                 </div>
-                <draggable v-model="data" @start="drag=true" @end="drag=false" tag="table" class="table-box">
+
+
+                <div class="flex justify-center items-center p-10 border border-gray-300 "
+                     v-if="!data.length">
+                    <div class="text-base text-gray-500 flex flex-col justify-center items-center  ">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none"
+                             viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                        <div class="mt-4">如需追加表字段请点击增加字段</div>
+                    </div>
+                </div>
+
+                <draggable v-if="data.length" v-model="data" @start="drag=true" @end="drag=false" tag="table" class="table-box">
                     <template #header>
                         <thead>
                         <tr>
@@ -455,22 +468,29 @@
                                 <select v-model="element.type" class="form-select" :disabled="element.preset">
                                     <optgroup label="字符串">
                                         <option value="CHAR">CHAR</option>
-                                        <option value="VARCHAR">VARCHAR</option>
-                                        <option value="BLOB">BLOB</option>
+                                        <option value="STRING">STRING</option>
+                                        <option value="BINARY">BINARY</option>
                                         <option value="TEXT">TEXT</option>
                                         <option value="MEDIUMTEXT">MEDIUMTEXT</option>
                                         <option value="LONGTEXT">LONGTEXT</option>
                                         <option value="JSON">JSON</option>
+                                        <option value="JSONB">JSONB</option>
                                     </optgroup>
                                     <optgroup label="数值">
                                         <option value="INTEGER">INTEGER</option>
-                                        <option value="BIGINT">BIGINT</option>
-                                        <option value="TINYINT">TINYINT</option>
-                                        <option value="SMALLINT">SMALLINT</option>
-                                        <option value="MEDIUMINT">MEDIUMINT</option>
+                                        <option value="BIGINTEGER">BIGINTEGER</option>
+                                        <option value="TINYINTEGER">TINYINTEGER</option>
+                                        <option value="SMALLINTEGER">SMALLINTEGER</option>
+                                        <option value="MEDIUMINTEGER">MEDIUMINTEGER</option>
                                         <option value="FLOAT">FLOAT</option>
                                         <option value="DOUBLE">DOUBLE</option>
                                         <option value="DECIMAL">DECIMAL</option>
+                                        <option value="POINT">POINT</option>
+                                        <option value="POLYGON">POLYGON</option>
+                                        <option value="MULTIPOINT">MULTIPOINT</option>
+                                        <option value="MULTIPOINT">MULTIPOINT</option>
+                                        <option value="GEOMETRY">GEOMETRY</option>
+                                        <option value="GEOMETRYCOLLECTION">GEOMETRYCOLLECTION</option>
                                     </optgroup>
                                     <optgroup label="日期时间">
                                         <option value="DATE">DATE</option>
@@ -495,7 +515,7 @@
                             </td>
                             <td class=" whitespace-nowrap">
                                 <select class="form-select" v-model="element.index" :disabled="element.preset">
-                                    <option>无</option>
+                                    <option value="">无</option>
                                     <option value="PRIMARY">PRIMARY</option>
                                     <option value="NORMAL">NORMAL</option>
                                     <option value="UNIQUE">UNIQUE</option>
@@ -524,8 +544,6 @@
 </div>
 
 <script type="application/javascript">
-
-    const defaultData = @json($info->data)
 
     const tablePackage = {
         column: {
@@ -784,7 +802,7 @@
             name: '文本框',
             icon: 'fa fa-pen',
             field: 'text',
-            fieldType: 'VARCHAR',
+            fieldType: 'STRING',
             fieldLen: 250,
             component: {
                 props: ['params'],
@@ -900,7 +918,7 @@
             name: '图片上传',
             icon: 'fa fa-image',
             field: 'image',
-            fieldType: 'VARCHAR',
+            fieldType: 'STRING',
             fieldLen: 250,
             component: {
                 props: ['params'],
@@ -985,7 +1003,7 @@
             name: '文件上传',
             icon: 'fa fa-file',
             field: 'file',
-            fieldType: 'VARCHAR',
+            fieldType: 'STRING',
             fieldLen: 250,
             component: {
                 props: ['params'],
@@ -1123,38 +1141,28 @@
             return {
                 drag: false,
                 tab: 0,
+                lock: false,
+                modelRead: false,
                 info: {
-                    name: defaultData ? defaultData.info.name : '',
-                    class: defaultData ? defaultData.info.class : '',
-                    app: defaultData ? defaultData.info.app : '',
+                    model: '',
+                    class: '',
+                    app: '',
                 },
-                formData: defaultData ? defaultData.formData : [],
+                formData: [],
                 formItemActive: false,
                 formPackage: formPackage,
                 formItem: {},
                 tableData: {
-                    column: defaultData ? defaultData.tableData.column : [],
-                    action: defaultData ? defaultData.tableData.action : [],
-                    filter: defaultData ? defaultData.tableData.filter : []
+                    column: [],
+                    action: [],
+                    filter: []
                 },
                 tableItemActive: false,
                 tablePackage: tablePackage,
                 tableItemIndex: 0,
                 tableItem: {},
-                data: defaultData ? defaultData.data : [
-                    {
-                        preset: 1,
-                        name: '主键',
-                        field: 'id',
-                        type: 'INTEGER',
-                        len: null,
-                        index: 'PRIMARY',
-                        unsigned: true,
-                        null: false,
-                        default: ''
-                    }
-                ],
-                dataFun: defaultData ? defaultData.dataFun : {
+                data: [],
+                dataFun: {
                     time: true,
                     del: false,
                     tree: false,
@@ -1235,7 +1243,7 @@
                 this.data.push({
                     name: '',
                     field: '',
-                    type: 'VARCHAR',
+                    type: 'STRING',
                     len: null,
                     index: '',
                     unsigned: false,
@@ -1247,51 +1255,116 @@
                 this.data.splice(index, 1)
             },
             generateForm() {
+                this.lock = true
                 let data = {
                     info: this.info,
                     formData: this.formData,
                 }
                 app.ajax({
-                    url: '{{route("admin.dev.app.generateForm", ['id' => $id])}}',
+                    url: '{{route("admin.dev.app.generateForm")}}',
                     type: 'POST',
-                    data: {
-                        data: data
-                    },
+                    data: data,
+                }).then(data => {
+                    this.lock = false
+                }).catch(error => {
+                    this.lock = false
                 })
             },
             copyForm() {
+                this.lock = true
                 let data = {
                     info: this.info,
                     formData: this.formData,
                 }
                 app.ajax({
-                    url: '{{route("admin.dev.app.copyForm", ['id' => $id])}}',
+                    url: '{{route("admin.dev.app.copyForm")}}',
                     type: 'POST',
-                    data: {
-                        data: data
-                    },
+                    data: data,
+                }).then(data => {
+                    this.lock = false
+                    let highlightedCode = hljs.highlightAuto(data.result.code).value
+                    let $code = $(`<div class="p-5"><pre class="hljs"><code class="language-php">${highlightedCode}</code></pre></div>`)
+                    dialog.layout({
+                        title: '生成代码',
+                        html: $code
+                    })
+                    var range = document.createRange();
+                    range.selectNodeContents($code[0]);
+                    var selection = window.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(range)
+                }).catch(error => {
+                    this.lock = false
                 })
             },
-            submit: function () {
+            generateTable() {
+                this.lock = true
+                let data = {
+                    info: this.info,
+                    tableData: this.tableData,
+                }
+                app.ajax({
+                    url: '{{route("admin.dev.app.generateTable")}}',
+                    type: 'POST',
+                    data: data,
+                }).then(data => {
+                    this.lock = false
+                }).catch(error => {
+                    this.lock = false
+                })
+            },
+            copyTable() {
+                this.lock = true
+                let data = {
+                    info: this.info,
+                    tableData: this.tableData,
+                }
+                app.ajax({
+                    url: '{{route("admin.dev.app.copyTable")}}',
+                    type: 'POST',
+                    data: data,
+                }).then(data => {
+                    this.lock = false
+                    let highlightedCode = hljs.highlightAuto(data.result.code).value
+                    let $code = $(`<div class="p-5"><pre class="hljs"><code class="language-php">${highlightedCode}</code></pre></div>`)
+                    dialog.layout({
+                        title: '生成代码',
+                        html: $code
+                    })
+                    var range = document.createRange();
+                    range.selectNodeContents($code[0]);
+                    var selection = window.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(range)
+                }).catch(error => {
+                    this.lock = false
+                })
+            },
+            saveData() {
+                this.lock = true
                 let data = {
                     info: this.info,
                     data: this.data,
-                    dataFun: this.dataFun,
-                    formData: this.formData,
-                    tableData: this.tableData
+                    fun: this.dataFun
                 }
                 app.ajax({
-                    url: '{{route("admin.dev.app.generateAdmin.save", ['id' => $id])}}',
+                    url: '{{route("admin.dev.app.saveData")}}',
                     type: 'POST',
-                    data: {
-                        data: data
-                    },
+                    data: data,
+                }).then(data => {
+                    this.lock = false
+                }).catch(error => {
+                    this.lock = false
                 })
-            }
+            },
         }
     }
 
     const vueApp = Vue.createApp(Counter)
     vueApp.component('draggable', window.vuedraggable)
     vueApp.mount('#counter')
+
+    Do('highlight', function () {
+        show.code()
+    })
 </script>

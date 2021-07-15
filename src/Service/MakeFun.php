@@ -13,234 +13,157 @@ use \Modules\Dev\Util\Generate;
 class MakeFun
 {
 
-    public function makeApp($data)
+    public function dataColumn($table, $vo)
     {
-        Artisan::call("app:make", [
-            'name' => $data['name'],
-            '--title' => $data['title'],
-            '--desc' => $data['description'],
-            '--auth' => $data['auth'],
-        ]);
-
-    }
-
-    public function makeFun($data, $type = 0)
-    {
-        $info = $data['info'];
-        $app = ucfirst($info['app']);
-        if (!is_dir(base_path('/modules/' . $app))) {
-            app_error('应用不存在');
+        $fun = '';
+        $len = $vo['len'];
+        switch ($vo['type']) {
+            case 'CHAR':
+                $fun = 'char';
+                break;
+            case 'STRING':
+                $fun = 'string';
+                break;
+            case 'BINARY':
+                $fun = 'binary';
+                $len = null;
+                break;
+            case 'TEXT':
+                $fun = 'text';
+                $len = null;
+                break;
+            case 'MEDIUMTEXT':
+                $fun = 'mediumText';
+                $len = null;
+                break;
+            case 'LONGTEXT':
+                $fun = 'longText';
+                $len = null;
+                break;
+            case 'INTEGER':
+                $fun = 'integer';
+                if ($vo['unsigned']) {
+                    $fun = 'increments';
+                }
+                $len = null;
+                break;
+            case 'BIGINTEGER':
+                $fun = 'bigInteger';
+                if ($vo['unsigned']) {
+                    $fun = 'unsignedBigInteger';
+                }
+                $len = null;
+                break;
+            case 'TINYINTEGER':
+                $fun = 'tinyInteger';
+                if ($vo['unsigned']) {
+                    $fun = 'tinyIncrements';
+                }
+                $len = null;
+                break;
+            case 'SMALLINTEGER':
+                $fun = 'smallInteger';
+                if ($vo['unsigned']) {
+                    $fun = 'unsignedSmallInteger';
+                }
+                $len = null;
+                break;
+            case 'MEDIUMINTEGER':
+                $fun = 'mediumInteger';
+                if ($vo['unsigned']) {
+                    $fun = 'unsignedMediumInteger';
+                }
+                $len = null;
+                break;
+            case 'JSON':
+                $fun = 'json';
+                $len = null;
+                break;
+            case 'JSONB':
+                $fun = 'jsonb';
+                $len = null;
+                break;
+            case 'FLOAT':
+                $fun = 'float';
+                break;
+            case 'DOUBLE':
+                $fun = 'double';
+                $len = null;
+                break;
+            case 'DECIMAL':
+                $fun = 'decimal';
+                break;
+            case 'DATE':
+                $fun = 'date';
+                $len = null;
+                break;
+            case 'TIME':
+                $fun = 'time';
+                $len = null;
+                break;
+            case 'YEAR':
+                $fun = 'year';
+                $len = null;
+                break;
+            case 'DATETIME':
+                $fun = 'dateTime';
+                $len = null;
+                break;
+            case 'TIMESTAMP':
+                $fun = 'timestamp';
+                $len = null;
+                break;
+            case 'POINT':
+                $fun = 'point';
+                $len = null;
+                break;
+            case 'POLYGON':
+                $fun = 'polygon';
+                $len = null;
+                break;
+            case 'MULTILINESTRING':
+                $fun = 'multiLineString';
+                $len = null;
+                break;
+            case 'MULTIPOINT':
+                $fun = 'multiPoint';
+                $len = null;
+                break;
+            case 'MULTIPOLYGON':
+                $fun = 'multiPolygon';
+                $len = null;
+                break;
+            case 'GEOMETRY':
+                $fun = 'geometry';
+                $len = null;
+                break;
+            case 'GEOMETRYCOLLECTION':
+                $fun = 'geometryCollection';
+                $len = null;
+                break;
+        }
+        if (!$fun) {
+            return null;
         }
 
-        $model = $data['data'];
-        $key = '';
-        foreach ($model as $vo) {
-            if ($vo['preset'] && $vo['index'] == 'PRIMARY' && $vo['unsigned']) {
-                $key = $vo['field'];
-            }
+        $base = $table->{$fun}($vo['field'], $len);
+
+        if ($vo['null']) {
+            $base = $base->nullable();
         }
-
-        $fun = lcfirst($info['class']);
-        $class = ucfirst($fun);
-        if (!$class) {
-            app_error('功能名未设置');
+        if ($vo['default']) {
+            $base = $base->default($vo['default']);
         }
-
-        $title = $info['name'];
-        if (!$title) {
-            app_error('功能名称未设置');
+        if ($vo['index'] === 'PRIMARY') {
+            $base = $base->primary($vo['field']);
         }
-
-        if (!$type) {
-            $table = strtolower($app) . '_' . $this->nameFormat($data['info']['class']);
-            if (Schema::hasTable($table)) {
-                app_error('模型表已存在');
-            }
+        if ($vo['index'] === 'NORMAL') {
+            $base = $base->index($vo['field']);
         }
-
-        $this->makeAdmin($app, $data, $fun, $key);
-
-        if (!$type) {
-            $this->makeModel($app, $data, $table, $fun, $key);
+        if ($vo['index'] === 'UNIQUE') {
+            $base = $base->unique($vo['field']);
         }
-
-        Artisan::call("app:build");
-    }
-
-    public function makeAdmin($app, $data, $fun, $key)
-    {
-        $class = ucfirst($fun);
-        $info = $data['info'];
-        $routeBase = 'admin' . '.' . lcfirst($app) . '.' . $fun;
-        $form = $data['formData'];
-        $formTpl = $this->formTpl($form);
-        $formTpl = <<<EOL
-                    \$form->card(function (Form \$form) {
-                        $formTpl
-                    });
-                    EOL;
-
-        $table = $data['tableData'];
-        $tableTpl = $this->tableTpl($table, $routeBase, $key);
-
-        Artisan::call("app:make-admin", [
-            'name' => $app,
-            '--class' => $info['class'],
-            '--title' => $info['name'],
-        ]);
-        $this->appendFile("{$app}/Admin/$class.php", $tableTpl, '// Generate Table Make');
-        $this->appendFile("{$app}/Admin/$class.php", $formTpl, '// Generate Form Make');
-    }
-
-    public function makeModel($app, $data, $table, $fun, $key)
-    {
-        $modelFun = $data['dataFun'];
-        $tmpArr = explode('_', $table);
-        $class = implode('', array_map(function ($vo) {
-            return ucfirst($vo);
-        }, $tmpArr));
-
-        Artisan::call("app:make-model", [
-            'name' => $data['info']['app'],
-            '--table' => $table,
-            '--key' => $key,
-            '--del' => $modelFun['del'],
-        ]);
-        $this->appendFile("{$app}/Model/$class.php", $this->modelUse($modelFun), '// Generate Model Make');
-
-        $data['data'] = array_reverse($data['data']);
-        Schema::table($table, function (Blueprint $table) use ($data, $key) {
-            foreach ($data['data'] as $vo) {
-                if ($vo['field'] === $key) {
-                    continue;
-                }
-                $base = $table;
-                $fun = '';
-                $len = $vo['len'];
-                switch ($vo['type']) {
-                    case 'CHAR':
-                        $fun = 'char';
-                        break;
-                    case 'VARCHAR':
-                        $fun = 'string';
-                        break;
-                    case 'BLOB':
-                        $fun = 'binary';
-                        $len = null;
-                        break;
-                    case 'TEXT':
-                        $fun = 'text';
-                        $len = null;
-                        break;
-                    case 'MEDIUMTEXT':
-                        $fun = 'mediumText';
-                        $len = null;
-                        break;
-                    case 'LONGTEXT':
-                        $fun = 'longText';
-                        $len = null;
-                        break;
-                    case 'INTEGER':
-                        $fun = 'integer';
-                        if ($vo['unsigned']) {
-                            $fun = 'increments';
-                        }
-                        $len = null;
-                        break;
-                    case 'BIGINT':
-                        $fun = 'bigInteger';
-                        if ($vo['unsigned']) {
-                            $fun = 'unsignedBigInteger';
-                        }
-                        $len = null;
-                        break;
-                    case 'TINYINT':
-                        $fun = 'tinyInteger';
-                        if ($vo['unsigned']) {
-                            $fun = 'tinyIncrements';
-                        }
-                        $len = null;
-                        break;
-                    case 'SMALLINT':
-                        $fun = 'smallInteger';
-                        if ($vo['unsigned']) {
-                            $fun = 'unsignedSmallInteger';
-                        }
-                        $len = null;
-                        break;
-                    case 'MEDIUMINT':
-                        $fun = 'mediumInteger';
-                        if ($vo['unsigned']) {
-                            $fun = 'unsignedMediumInteger';
-                        }
-                        $len = null;
-                        break;
-                    case 'JSON':
-                        $fun = 'json';
-                        $len = null;
-                        break;
-                    case 'FLOAT':
-                        $fun = 'float';
-                        $len = null;
-                        break;
-                    case 'DOUBLE':
-                        $fun = 'double';
-                        $len = null;
-                        break;
-                    case 'DECIMAL':
-                        $fun = 'decimal';
-                        $len = null;
-                        break;
-                    case 'DATE':
-                        $fun = 'date';
-                        $len = null;
-                        break;
-                    case 'TIME':
-                        $fun = 'time';
-                        $len = null;
-                        break;
-                    case 'YEAR':
-                        $fun = 'year';
-                        $len = null;
-                        break;
-                    case 'DATETIME':
-                        $fun = 'dateTime';
-                        $len = null;
-                        break;
-                    case 'TIMESTAMP':
-                        $fun = 'timestamp';
-                        $len = null;
-                        break;
-                }
-                if (!$fun) {
-                    continue;
-                }
-
-                $base = $base->{$fun}($vo['field'], $len);
-
-                if ($vo['null']) {
-                    $base = $base->nullable();
-                }
-                if ($vo['default']) {
-                    $base = $base->default($vo['default']);
-                }
-                if ($vo['index'] === 'PRIMARY') {
-                    $base = $base->primary($vo['field']);
-                }
-                if ($vo['index'] === 'NORMAL') {
-                    $base = $base->index($vo['field']);
-                }
-                if ($vo['index'] === 'UNIQUE') {
-                    $base = $base->unique($vo['field']);
-                }
-                $base->comment($vo['name'])->after($key);
-            }
-        });
-        $fun = ucfirst($fun);
-        $classFile = base_path("modules/{$app}/Admin/{$fun}.php");
-        $fileContent = file_get_contents($classFile);
-        $fileContent = str_replace('\\Duxravel\\Core\\Model\\Base', "\\Modules\\$app\\Model\\$class", $fileContent);
-        file_put_contents($classFile, $fileContent);
+        return $base->comment($vo['name']);
     }
 
     public function modelUse($list)
@@ -272,12 +195,12 @@ class MakeFun
         $data = [];
         foreach ($form as $vo) {
             $name = 'formGenerate' . ucfirst($vo['type']);
-            $data[] = '    ' . $this->{$name}($vo);
+            $data[] = $this->{$name}($vo);
         }
         return implode("\n", $data) . "\n";
     }
 
-    public function tableTpl($table, $routeBase, $key)
+    public function tableTpl($table, $routeBase = '', $key = 'id')
     {
 
         $data = [];
@@ -496,17 +419,21 @@ class MakeFun
 
     public function appendFile($file, $content = '', $mark = '')
     {
-        $file = base_path('/modules/' . $file);
         $data = [];
         $contentData = explode("\n", $content);
+        $markStatus = false;
         foreach (file($file) as $line) {
             if (strpos($line, $mark) !== false) {
+                $markStatus = true;
                 $place = substr($line, 0, strrpos($line, $mark));
                 foreach ($contentData as $content) {
                     $data[] = $place . $content . "\n";
                 }
             }
             $data[] = $line;
+        }
+        if (!$markStatus) {
+            app_error('暂未发现生成标记');
         }
         file_put_contents($file, implode("", $data));
     }

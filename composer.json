@@ -19,11 +19,6 @@
   },
   "extra": {
     "branch-alias": {},
-    "laravel": {
-      "providers": [
-        "Modules\\Dev\\Providers\\DevServiceProvider"
-      ]
-    },
     "duxravel": {
       "service": [
         "Modules\\Dev\\Service\\Menu"
